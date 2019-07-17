@@ -1,0 +1,293 @@
+Sub AddAnredeGesamt()
+'Funktion um eine personalisierte Anrede mit den Feldern Anrede, Titel und Nachname zu erstellen.
+'On Error GoTo ErrAddAnrede:
+    Dim rwIndex As Integer 'Cellen
+    Dim colIndex As Integer 'Spalten
+    Dim colAnrede As Integer
+    Dim colNachname As Integer
+    Dim colTitel As Integer
+    Dim colEmail As Integer
+    Dim colProjektname As Integer
+    Dim colIndexOutput As Integer
+    Dim lastColumn As Integer
+    Dim lastRow As Integer
+    Dim n As Integer
+    Dim AnredeGesamt As String
+    Dim responseDel As Integer
+    Dim responseProj As Integer
+    
+    
+    Let AnredeGesamt = ""
+    Let colEmail = 0
+    Let colAnrede = 0
+    Let colNachname = 0
+    Let colTitel = 0
+    
+'sucht die letzten Spalten und Zeilen
+    If Cells(1, 1).Value = "" And Cells(1, 2).Value = "" Then
+    MsgBox "Bitte stelle sicher, dass dein Verteiler in Spalte A anfängt."
+    Resume ErrAddAnrede:
+    ElseIf Cells(1, 1).Value = "" And Cells(1, 2).Value <> "" Then
+    Cells(1, 1).EntireColumn.Delete
+    lastRow = Range("B1").End(xlDown).Row
+    Else
+    lastRow = Range("A1").End(xlDown).Row
+    End If
+    lastColumn = ActiveSheet.Range("A1").End(xlToRight).Column + 1
+    
+    
+'Loop um nach Anrede, Nachname und Titel zu suchen und in die Variablen zu speichern
+    For rwIndex = 1 To 1
+            For colIndex = 1 To lastColumn
+                If Cells(rwIndex, colIndex).Value = "Anrede" Then colAnrede = colIndex
+                If Cells(rwIndex, colIndex).Value = "Nachname" Then colNachname = colIndex
+                If Cells(rwIndex, colIndex).Value = "Titel" Then colTitel = colIndex
+                If Cells(rwIndex, colIndex).Value = "E-Mail" Or Cells(rwIndex, colIndex).Value = "Projekt E-Mail" Or Cells(rwIndex, colIndex).Value = "PROJEKT E-MAIL" Then colEmail = colIndex
+                If Cells(rwIndex, colIndex).Value = "Projektname" Or Cells(rwIndex, colIndex).Value = "PROJEKTNAME" Then colProjektname = colIndex
+            Next colIndex
+    Next rwIndex
+    
+
+'MelDung falls nichts gefunden wurde
+    If colProjektname <> 0 Then
+    Let responseProj = MsgBox("Ich habe eine Überschrift Projektname in Spalte " & colProjektname & " gefunden." & Chr(13) & "Soll dies ein Projektverteiler werden?", vbYesNo, "Projektverteiler")
+    Else
+        If colAnrede = 0 Then MsgBox "Ich konnte leider keine Anrede-Spalte finden!" _
+        & Chr(13) & "Bitte überprüfe ob in der ersten Zeile eine Zelle mit der Bezeichnung Anrede existiert."
+        If colNachname = 0 Then MsgBox "Ich konnte leider keine Nachnamen-Spalte finden!" _
+        & Chr(13) & "Bitte überprüfe ob in der ersten Zeile eine Zelle mit der Bezeichnung Doof existiert."
+        If colTitel = 0 Then MsgBox "Ich konnte leider keine Titel-Spalte finden!" _
+        & Chr(13) & "Bitte überprüfe ob in der ersten Zeile eine Zelle mit der Bezeichnung Titel existiert."
+        If colEmail = 0 Then MsgBox "Ich konnte leider keine E-Mail-Spalte finden!" _
+        & Chr(13) & "Bitte überprüfe ob in der ersten Zeile eine Zelle mit der Bezeichnung E-Mail existiert."
+    End If
+    
+    If responseProj = vbNo Then
+ 
+        If colAnrede = 0 Then
+        MsgBox "Ich konnte leider keine Anrede-Spalte finden!" _
+        & Chr(13) & "Bitte überprüfe ob in der ersten Zeile eine Zelle mit der Bezeichnung Anrede existiert."
+        End If
+        If colNachname = 0 Then
+        MsgBox "Ich konnte leider keine Nachnamen-Spalte finden!" _
+        & Chr(13) & "Bitte überprüfe ob in der ersten Zeile eine Zelle mit der Bezeichnung Nachname existiert."
+        End If
+        If colTitel = 0 Then
+        MsgBox "Ich konnte leider keine Titel-Spalte finden!" _
+        & Chr(13) & "Bitte überprüfe ob in der ersten Zeile eine Zelle mit der Bezeichnung Titel existiert."
+        End If
+        If colEmail = 0 Then
+        MsgBox "Ich konnte leider keine E-Mail-Spalte finden!" _
+        & Chr(13) & "Bitte überprüfe ob in der ersten Zeile eine Zelle mit der Bezeichnung E-Mail existiert."
+        End If
+        
+    End If
+    
+    
+'Erstellt einen String in der letzten Spalte in der ersten Zeile
+    colIndexOutput = lastColumn
+    Cells(1, colIndexOutput) = "Anrede_Gesamt"
+    
+    
+'Looped Durch alle weiteren Rows und appended den Wert der Zellen an die Variable AnredeGesamt.
+'Dann printed der loop den String in die letzte Zeile
+   Dim responseAnrede As Integer
+   
+   
+   If responseProj = vbYes Then
+    For n = 2 To lastRow + 5
+       AnredeGesamt = "Liebes Team von " & Cells(n, colProjektname)
+        Cells(n, colIndexOutput) = AnredeGesamt
+    Next n
+   Else
+    Let responseAnrede = MsgBox("Möchtest Du, dass die Anrede in diesem Verteiler formell gehalten wird?" & Chr(13) & "Sehr geehrter Herr, Sehr geehrte Frau...", vbYesNo, "Formelle Anrede?")
+        If responseAnrede = vbYes Then
+            For n = 2 To lastRow + 5
+                If Cells(n, colAnrede).Value = "Herr" Then
+                AnredeGesamt = "Sehr geehrter Herr "
+                Else: AnredeGesamt = "Sehr geehrte Frau "
+                End If
+                If Cells(n, colTitel).Value <> "" Then
+                AnredeGesamt = AnredeGesamt & Cells(n, colTitel) & " " & Cells(n, colNachname)
+                Else: AnredeGesamt = AnredeGesamt & Cells(n, colNachname)
+                End If
+                Cells(n, colIndexOutput) = AnredeGesamt
+            Next n
+        Else
+            For n = 2 To lastRow + 5
+                If Cells(n, colAnrede).Value = "Herr" Then
+                AnredeGesamt = "Lieber Herr "
+                Else: AnredeGesamt = "Liebe Frau "
+                End If
+                If Cells(n, colTitel).Value <> "" Then
+                AnredeGesamt = AnredeGesamt & Cells(n, colTitel) & " " & Cells(n, colNachname)
+                Else: AnredeGesamt = AnredeGesamt & Cells(n, colNachname)
+                End If
+                Cells(n, colIndexOutput) = AnredeGesamt
+            Next n
+        End If
+    End If
+    
+'Duplikate finden und markieren
+    
+    Dim rngCell As Range, _
+    rngMyData As Range
+    Dim strMyDupList As String
+    Dim intMyCounter As Integer
+    Dim objMyUniqueList As Object
+     
+    Set rngMyData = Range(Cells(1, colEmail), Cells(lastRow, colEmail))
+    Set objMyUniqueList = CreateObject("Scripting.Dictionary")
+     
+    Application.ScreenUpdating = False
+     
+    strMyDupList = "": intMyCounter = 0
+     
+    For Each rngCell In rngMyData
+       If Evaluate("COUNTIF(" & rngMyData.Address & "," & rngCell.Address & ")") > 1 Then
+                rngCell.EntireRow.Interior.Color = RGB(255, 255, 204) 'Light yellow. Change to suit.
+                If objMyUniqueList.exists(CStr(rngCell)) = False Then
+                    intMyCounter = intMyCounter + 1
+                    objMyUniqueList.Add CStr(rngCell), intMyCounter
+                    If strMyDupList = "" Then
+                        strMyDupList = rngCell
+                    Else
+                        strMyDupList = strMyDupList & vbNewLine & rngCell
+                    End If
+                End If
+            Else
+                rngCell.Interior.ColorIndex = xlNone
+            End If
+       Next rngCell
+       
+    Set rngMyData = Nothing: Set objMyUniqueList = Nothing
+    Application.ScreenUpdating = False
+    
+'Emails Validieren
+    Dim invalideEmail As Integer
+    Dim validEmail As Integer
+    Let invalidEmail = 0
+    Let validEmail = 0
+
+    For rwIndex = 2 To lastRow
+        If IsEmailValid(Cells(rwIndex, colEmail).Value) Then
+        validEmail = validEmail + 1
+        Else
+            Cells(rwIndex, colEmail).Interior.Color = RGB(255, 100, 0)
+            invalidEmail = invalidEmail + 1
+        End If
+    Next rwIndex
+  
+'füllt alle leeren Cellen
+    For rwIndex = 1 To lastRow + 5
+            For colIndex = 1 To lastColumn
+                If Cells(rwIndex, colIndex).Value = "" Then
+                Cells(rwIndex, colIndex).Value = "_"
+                End If
+            Next colIndex
+    Next rwIndex
+    
+'Ausgabe des Ergebniss
+    If strMyDupList <> "" And invalidEmail <> 0 Then
+    MsgBox "Ich habe erfolgreich Deinen Verteiler erstellt und in Zeile " & colIndexOutput & " die Anrede_Gesamt eingefügt." & Chr(10) & _
+    "Leider habe ich in Deinen E-Mailadressen " & invalidEmail & " invalide Adressen gefunden." & Chr(10) & "Diese werde ich für Dich rot markieren." & Chr(10) & Chr(10) & _
+    "Außerdem habe ich in Deinem Verteiler folgende doppelte E-Mailadressen gefunden und werde diese gelb markiern:" & Chr(10) & Chr(10) & strMyDupList, , "Verteiler Ergebnis"
+    ElseIf strMyDupList <> "" Then
+    MsgBox "Ich habe erfolgreich Deinen Verteiler erstellt und in Zeile " & colIndexOutput & " die Anrede_Gesamt eingefügt." & Chr(10) & _
+    "Außerdem habe ich in Deinem Verteiler folgende doppelte E-Mailadressen gefunden und werde diese gelb markieren:" & Chr(10) & Chr(10) & strMyDupList, , "Verteiler Ergebnis"
+    ElseIf invalidEmail <> 0 Then
+    MsgBox "Ich habe erfolgreich Deinen Verteiler erstellt und in Zeile " & colIndexOutput & " die Anrede_Gesamt eingefügt." & Chr(10) & _
+    "Leider habe ich in Deinen E-Mailadressen " & invalidEmail & " invalide Adressen gefunden." & Chr(10) & "Diese werde ich für Dich rot markieren.", , "Verteiler Ergebnis"
+    Else
+    MsgBox "Ich habe erfolgreich Deinen Verteiler erstellt und in Zeile " & colIndexOutput & " die Anrede_Gesamt eingefügt.", , "Verteiler Ergebnis"
+    End If
+    
+
+Dim currentColumn As Integer
+Dim columnHeading As Integer
+
+
+responseDel = MsgBox("Möchtest Du alle überflüssigen Spalten löschen?", vbYesNo, "Verteiler bereinigen?")
+If responseDel = vbYes Then
+    For colIndex = lastColumn To 1 Step -1
+    columnHeading = colIndex
+
+        'CHECK WHETHER TO KEEP THE COLUM
+            Select Case columnHeading
+            Case colEmail, colProjektname, lastColumn
+                'Do nothing
+            Case Else
+            Cells(1, colIndex).EntireColumn.Delete
+            End Select
+        Next colIndex
+End If
+
+'Speichert den Verteiler wenn gewünscht ab.
+Dim responseSave As Integer
+Dim responseSaveString As String
+
+responseSave = MsgBox("Möchtest du deinen Verteiler in deinem Dokumente-Ordner ablegen?", vbYesNo, "Verteiler speichern?")
+If responseSave = vbYes Then
+    responseSaveString = InputBox("Welchen Dateinamen soll Dein Verteiler haben?", "Verteiler Nummer", "z.B. super_verteiler")
+    ActiveWorkbook.SaveAs "C:\Users\" & Application.UserName & "\Documents\" & responseSaveString & ".xls", FileFormat:=56
+End If
+
+Exit_AddAnrede:
+    Exit Sub
+ErrAddAnrede:
+    MsgBox "Leider konnte ich diesmal keinen validen Verteiler erstellen! Überprüfe am Besten noch einmal Deinen Verteiler-Header."
+    Resume Exit_AddAnrede
+End Sub
+
+Function IsEmailValid(strEmail)
+    Dim strArray As Variant
+    Dim strItem As Variant
+    Dim i As Long, c As String, blnIsItValid As Boolean
+    blnIsItValid = True
+     
+    i = Len(strEmail) - Len(Application.Substitute(strEmail, "@", ""))
+    If i <> 1 Then IsEmailValid = False: Exit Function
+    ReDim strArray(1 To 2)
+    strArray(1) = Left(strEmail, InStr(1, strEmail, "@", 1) - 1)
+    strArray(2) = Application.Substitute(Right(strEmail, Len(strEmail) - Len(strArray(1))), "@", "")
+    For Each strItem In strArray
+        If Len(strItem) <= 0 Then
+            blnIsItValid = False
+            IsEmailValid = blnIsItValid
+            Exit Function
+        End If
+        For i = 1 To Len(strItem)
+            c = LCase(Mid(strItem, i, 1))
+            If InStr("abcdefghijklmnopqrstuvwxyz_-.", c) <= 0 And Not IsNumeric(c) Then
+                blnIsItValid = False
+                IsEmailValid = blnIsItValid
+                Exit Function
+            End If
+        Next i
+        If Left(strItem, 1) = "." Or Right(strItem, 1) = "." Then
+            blnIsItValid = False
+            IsEmailValid = blnIsItValid
+            Exit Function
+        End If
+    Next strItem
+    If InStr(strArray(2), ".") <= 0 Then
+        blnIsItValid = False
+        IsEmailValid = blnIsItValid
+        Exit Function
+    End If
+    i = Len(strArray(2)) - InStrRev(strArray(2), ".")
+    If i <> 2 And i <> 3 Then
+        blnIsItValid = False
+        IsEmailValid = blnIsItValid
+        Exit Function
+    End If
+    If InStr(strEmail, "..") > 0 Then
+        blnIsItValid = False
+        IsEmailValid = blnIsItValid
+        Exit Function
+    End If
+    IsEmailValid = blnIsItValid
+End Function
+
+
+
